@@ -97,7 +97,7 @@ class SolarScene {
         ]
         
         let focusOnBody = true
-        let focusIndex = 0
+        let focusIndex = 2
         
         for i in 0...bodies.count - 1 {
             bodies[i].initial()

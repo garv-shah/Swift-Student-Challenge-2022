@@ -10,6 +10,8 @@ struct ContentView: View {
     @State private var sideButtonsOpacity: CGFloat = 0
     @State private var sideButtonsExpanded: Bool = false
     
+    @State var isPresented: Bool = false
+    
     var body: some View {
         VStack {
             
@@ -30,7 +32,7 @@ struct ContentView: View {
                     }
                 }
                 
-                sideButtonsExpanded = !sideButtonsExpanded
+                sideButtonsExpanded.toggle()
             }
             
             .floatingActionButton(color: .blue, image: Image(systemName: "plus").foregroundColor(.white), align: ButtonAlign.right, customY: 80, customX: sideButtonsX, opacity: sideButtonsOpacity) {
@@ -46,8 +48,26 @@ struct ContentView: View {
             }
             
             .floatingActionButton(color: .blue, image: Image(systemName: "gear").foregroundColor(.white), align: ButtonAlign.left) {
-                // do something
+                isPresented.toggle()
             }
+            
+            .sheetWithDetents(
+                        isPresented: $isPresented,
+                        detents: [.medium(),.large()]
+                    ) {
+                        print("The sheet has been dismissed")
+                    } content: {
+                        Group {
+                            Text("Garv")
+                                .bold()
+                            +
+                            Text(" says hi to ")
+                            +
+                            Text("Will")
+                                .bold()
+                        }
+                        .font(.title)
+                    }
         }
     }
 }
