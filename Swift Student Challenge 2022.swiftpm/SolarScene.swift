@@ -10,11 +10,15 @@ import SceneKit
 import Foundation
 
 class SolarScene {
-    
     let scene: SCNScene
     let camera: SCNNode
     let viewOptions: SceneView.Options
     var bodies: [CelestialBody]
+    var focusOnBody: Bool
+    var focusIndex: Int
+    var gameloop : Timer? = nil
+    var counter: Double = 0
+    var trails: Bool
     
     struct CelestialBody {
         var internalName: String
@@ -37,16 +41,8 @@ class SolarScene {
             let body = SCNNode(geometry: object)
             body.name = "planet_" + internalName + "_" + "\(mass)"
             body.position = initialPosition
-            let trail = SCNParticleSystem()
-            trail.birthRate = 10000
-            //trail.particleLifeSpan = 4
-            trail.particleSize = 0.1
-            trail.particleColor = color.withAlphaComponent(0.1)
-            trail.emitterShape = SCNSphere(radius: 1)
-            trail.particleImage = #imageLiteral(resourceName: "trail.png")
             planetBody = body
             internalScene.rootNode.addChildNode(body)
-            body.addParticleSystem(trail)
         }
         
         mutating func updateVelocity(timeStep: Double) {
@@ -64,7 +60,7 @@ class SolarScene {
         }
         
         mutating func updatePosition(timeStep: Double, focusBody: CelestialBody? = nil) {
-            self.planetBody!.position = self.planetBody!.position + (currentVelocity! * timeStep) - (focusBody?.returnPosition(timeStep: timeStep) ?? SCNVector3(0, 0, 0))
+            self.planetBody!.position = self.planetBody!.position + (currentVelocity! * timeStep) - (focusBody?.returnPosition(timeStep: timeStep) ?? SCNVector3(0, 0, 0)) + (focusBody?.initialPosition ?? SCNVector3(0, 0, 0))
         }
         
         func returnPosition(timeStep: Double) -> SCNVector3 {
@@ -72,7 +68,10 @@ class SolarScene {
         }
     }
     
-    init() {
+    init(focusOnBody: Bool, focusIndex: Int, trails: Bool) {
+        self.focusOnBody = focusOnBody
+        self.focusIndex = focusIndex
+        self.trails = trails
         
         //create the stuff for SceneView
         scene = SCNScene()
@@ -94,36 +93,18 @@ class SolarScene {
         bodies = [
             CelestialBody(internalName: "sun", mass: 10.0, radius: 10.0, initialVelocity: SCNVector3(0, 0, 0), initialPosition: SCNVector3(0, 0, 0), color: UIColor.yellow, internalScene: scene, gravitationalConstant: 1),
             CelestialBody(internalName: "earth", mass: 4.0, radius: 4.0, initialVelocity: SCNVector3(0, 0, 0.8), initialPosition: SCNVector3(20, 0, 0), color: UIColor.green, internalScene: scene, gravitationalConstant: 1),
-            CelestialBody(internalName: "moon", mass: 1.0, radius: 1.0, initialVelocity: SCNVector3(0, 0, -0.8), initialPosition: SCNVector3(30, 0, 0), color: UIColor.blue, internalScene: scene, gravitationalConstant: 1)
+            CelestialBody(internalName: "meteor", mass: 1.0, radius: 1.0, initialVelocity: SCNVector3(0, 0, -0.8), initialPosition: SCNVector3(30, 0, 0), color: UIColor.blue, internalScene: scene, gravitationalConstant: 1)
         ]
-        
-        let focusOnBody = true
-        let focusIndex = 2
         
         for i in 0...bodies.count - 1 {
             bodies[i].initial()
         }
         
         camera.look(at: bodies[focusIndex].planetBody!.position)
-        var counter: Double = 0
         
-        Timer.scheduledTimer(withTimeInterval: 0.015, repeats: true) { (_) in
-            for i in 0...self.bodies.count - 1 {
-                self.bodies[i].updateVelocity(timeStep: counter)
-            }
-            
-            for i in 0...self.bodies.count - 1 {
-                if focusOnBody {
-                    self.bodies[i].updatePosition(timeStep: counter, focusBody: self.bodies[focusIndex])
-                } else {
-                    self.bodies[i].updatePosition(timeStep: counter)
-                }
-            }
-            
-            //self.camera.position = SCNVector3(x: bodies[focusIndex].planetBody!.position.x, y: bodies[focusIndex].planetBody!.position.y + 150, z: bodies[focusIndex].planetBody!.position.z)
-            counter = 1.25 * sqrt(counter) + 0.01
+        if trails {
+            showTrails()
         }
-        
     }
     
 //    func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
@@ -150,4 +131,55 @@ class SolarScene {
         
     }
     
+    func startLoop() {
+        gameloop = Timer.scheduledTimer(withTimeInterval: 0.015, repeats: true) { (_) in
+            for i in 0...self.bodies.count - 1 {
+                self.bodies[i].updateVelocity(timeStep: self.counter)
+            }
+            
+            for i in 0...self.bodies.count - 1 {
+                if self.focusOnBody {
+                    self.bodies[i].updatePosition(timeStep: self.counter, focusBody: self.bodies[self.focusIndex])
+                } else {
+                    self.bodies[i].updatePosition(timeStep: self.counter)
+                }
+            }
+            
+            //self.camera.position = SCNVector3(x: bodies[focusIndex].planetBody!.position.x, y: bodies[focusIndex].planetBody!.position.y + 150, z: bodies[focusIndex].planetBody!.position.z)
+            self.counter = 1.25 * sqrt(self.counter) + 0.01
+        }
+    }
+    
+    func pauseLoop() {
+        gameloop?.invalidate()
+        gameloop = nil
+        counter = 0
+    }
+    
+    func hideTrails() {
+        for body in scene.rootNode.childNodes(passingTest: {
+            (node, stop) -> Bool in
+            return (node.name?.components(separatedBy: "_")[0] == "planet")
+        }) {
+            body.removeAllParticleSystems()
+        }
+    }
+    
+    func showTrails() {
+        for body in scene.rootNode.childNodes(passingTest: {
+            (node, stop) -> Bool in
+            return (node.name?.components(separatedBy: "_")[0] == "planet")
+        }) {
+            let bodyStruct = bodies.first(where: { (internalBody) in
+                internalBody.internalName == body.name?.components(separatedBy: "_")[1]
+            })
+            
+            let trail = SCNParticleSystem()
+            trail.birthRate = 10000
+            trail.particleSize = 0.1
+            trail.particleColor = bodyStruct?.color.withAlphaComponent(0.1) ?? UIColor(.blue)
+            trail.emitterShape = SCNSphere(radius: 1)
+            body.addParticleSystem(trail)
+        }
+    }
 }

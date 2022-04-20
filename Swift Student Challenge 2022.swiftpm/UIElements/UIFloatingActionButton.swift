@@ -76,3 +76,11 @@ extension View {
                                                align: align))
         }
 }
+
+extension Array {
+    subscript( circular index: Int ) -> Element? {
+        guard !isEmpty else { return nil }
+        let modIndex = index % count
+        return self[ modIndex < 0 ? modIndex + count : modIndex ]
+    }
+}
