@@ -34,9 +34,15 @@ let package = Package(
             ]
         )
     ],
+    dependencies: [
+        .package(url: "https://github.com/joogps/SlideOverCard", "2.0.0"..<"3.0.0")
+    ],
     targets: [
         .executableTarget(
             name: "AppModule",
+            dependencies: [
+                .product(name: "SlideOverCard", package: "slideovercard")
+            ],
             path: ".",
             resources: [
                 .process("Resources")

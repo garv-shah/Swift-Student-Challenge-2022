@@ -1,6 +1,7 @@
 import SwiftUI
 import SceneKit
 import Foundation
+import SlideOverCard
 
 
 struct ContentView: View {
@@ -9,8 +10,9 @@ struct ContentView: View {
     @State private var sideButtonsX: CGFloat = 100
     @State private var sideButtonsOpacity: CGFloat = 0
     @State private var sideButtonsExpanded: Bool = false
-    
-    @State var isPresented: Bool = false
+    @State private var isDeletePresented: Bool = false
+    @State private var selectedBody: String = ""
+    @State private var availableBodies: [String] = []
     
     var body: some View {
         VStack {
@@ -36,11 +38,18 @@ struct ContentView: View {
             }
             
             .floatingActionButton(color: .blue, image: Image(systemName: "plus").foregroundColor(.white), align: ButtonAlign.right, customY: 80, customX: sideButtonsX, opacity: sideButtonsOpacity) {
-                solarscene.createAndPutBoxOnRoot()
+                solarscene.createBody()
             }
             
             .floatingActionButton(color: .blue, image: Image(systemName: "trash").foregroundColor(.white), align: ButtonAlign.right, customY: 160, customX: sideButtonsX, opacity: sideButtonsOpacity) {
-                solarscene.scene.rootNode.childNode(withName: "box", recursively: false)?.removeFromParentNode()
+                availableBodies = solarscene.bodies.map({ (body) in
+                    return body.internalName
+                })
+                
+                selectedBody = availableBodies[0]
+                
+                isDeletePresented.toggle()
+                //solarscene.scene.rootNode.childNode(withName: solarscene.bodies[1].planetBody?.name ?? "planet", recursively: false)?.removeFromParentNode()
             }
             
             .floatingActionButton(color: .blue, image: Image(systemName: "play.fill").foregroundColor(.white), align: ButtonAlign.centre) {
@@ -48,26 +57,34 @@ struct ContentView: View {
             }
             
             .floatingActionButton(color: .blue, image: Image(systemName: "gear").foregroundColor(.white), align: ButtonAlign.left) {
-                isPresented.toggle()
+                
             }
             
-            .sheetWithDetents(
-                        isPresented: $isPresented,
-                        detents: [.medium(),.large()]
-                    ) {
-                        print("The sheet has been dismissed")
-                    } content: {
-                        Group {
-                            Text("Garv")
-                                .bold()
-                            +
-                            Text(" says hi to ")
-                            +
-                            Text("Will")
-                                .bold()
-                        }
+            .slideOverCard(isPresented: $isDeletePresented) {
+                VStack {
+                    Text("Delete Body:")
+                        .fontWeight(.bold)
                         .font(.title)
+                    
+                    Picker("Please choose a body", selection: $selectedBody) {
+                        ForEach(availableBodies, id: \.self) {
+                            Text($0)
+                        }
                     }
+                    
+                    Text("You selected \"\(selectedBody)\", which has a mass of \(String(format: "%.2f", solarscene.bodies[availableBodies.firstIndex(of: selectedBody) ?? 0].mass)) and a colour of \(solarscene.bodies[availableBodies.firstIndex(of: selectedBody) ?? 0].color.accessibilityName)")
+                        .padding(10)
+                        .multilineTextAlignment(.center)
+                    
+                    Button("Confirm", action: {
+                        solarscene.scene.rootNode.childNode(withName: solarscene.bodies[availableBodies.firstIndex(of: selectedBody) ?? 0].planetBody?.name ?? "planet", recursively: false)?.removeFromParentNode()
+                        isDeletePresented = false
+                    })
+                    .padding(.bottom)
+                }
+                .frame(maxWidth: .infinity, alignment: .center)
+            }
+    
         }
     }
 }
