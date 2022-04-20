@@ -13,12 +13,13 @@ class SolarScene {
     let scene: SCNScene
     let camera: SCNNode
     let viewOptions: SceneView.Options
-    var bodies: [CelestialBody]
+    var bodies: [CelestialBody] = []
     var focusOnBody: Bool
     var focusIndex: Int
     var gameloop : Timer? = nil
     var counter: Double = 0
     var trails: Bool
+    var inputBodies: [BodyDefiner]
     
     struct CelestialBody {
         var internalName: String
@@ -68,10 +69,11 @@ class SolarScene {
         }
     }
     
-    init(focusOnBody: Bool, focusIndex: Int, trails: Bool) {
+    init(focusOnBody: Bool, focusIndex: Int, trails: Bool, inputBodies: [BodyDefiner]) {
         self.focusOnBody = focusOnBody
         self.focusIndex = focusIndex
         self.trails = trails
+        self.inputBodies = inputBodies
         
         //create the stuff for SceneView
         scene = SCNScene()
@@ -90,11 +92,11 @@ class SolarScene {
         //set up the scene object
         scene.background.contents = UIColor.black
         
-        bodies = [
-            CelestialBody(internalName: "sun", mass: 10.0, radius: 10.0, initialVelocity: SCNVector3(0, 0, 0), initialPosition: SCNVector3(0, 0, 0), color: UIColor.yellow, internalScene: scene, gravitationalConstant: 1),
-            CelestialBody(internalName: "earth", mass: 4.0, radius: 4.0, initialVelocity: SCNVector3(0, 0, 0.8), initialPosition: SCNVector3(20, 0, 0), color: UIColor.green, internalScene: scene, gravitationalConstant: 1),
-            CelestialBody(internalName: "meteor", mass: 1.0, radius: 1.0, initialVelocity: SCNVector3(0, 0, -0.8), initialPosition: SCNVector3(30, 0, 0), color: UIColor.blue, internalScene: scene, gravitationalConstant: 1)
-        ]
+        for body in inputBodies {
+            bodies.append(
+                CelestialBody(internalName: body.name, mass: body.mass, radius: body.mass, initialVelocity: body.velocity, initialPosition: body.position, color: body.color, internalScene: scene, gravitationalConstant: 1)
+            )
+        }
         
         for i in 0...bodies.count - 1 {
             bodies[i].initial()

@@ -7,7 +7,14 @@ import SlideOverCard
 struct ContentView: View {
     
     @State var solarscene = SolarScene(
-        focusOnBody: true, focusIndex: 2, trails: true
+        focusOnBody: true,
+        focusIndex: 2,
+        trails: true,
+        inputBodies: [
+            BodyDefiner(name: "sun", mass: 10.0, velocity: SCNVector3(0, 0, 0), position: SCNVector3(0, 0, 0), color: UIColor.yellow),
+            BodyDefiner(name: "earth", mass: 4.0, velocity: SCNVector3(0, 0, 0.8), position: SCNVector3(20, 0, 0), color: UIColor.green),
+            BodyDefiner(name: "meteor", mass: 1.0, velocity: SCNVector3(0, 0, -0.8), position: SCNVector3(30, 0, 0), color: UIColor.blue)
+        ]
     )
     
     @State private var sideButtonsX: CGFloat = 100
@@ -162,7 +169,7 @@ struct ContentView: View {
                         Button("Restart", action: {
                             solarscene.pauseLoop()
                             solarscene = SolarScene(
-                                focusOnBody: focusOnBody, focusIndex: availableBodies.firstIndex(of: selectedBody) ?? 0, trails: showTrails
+                                focusOnBody: focusOnBody, focusIndex: availableBodies.firstIndex(of: selectedBody) ?? 0, trails: showTrails, inputBodies: solarscene.inputBodies
                             )
                             isSettingsPresented = false
                             playing = false
@@ -175,7 +182,7 @@ struct ContentView: View {
                         Button("Confirm", action: {
                             solarscene.pauseLoop()
                             solarscene = SolarScene(
-                                focusOnBody: focusOnBody, focusIndex: availableBodies.firstIndex(of: selectedBody) ?? 0, trails: showTrails
+                                focusOnBody: focusOnBody, focusIndex: availableBodies.firstIndex(of: selectedBody) ?? 0, trails: showTrails, inputBodies: solarscene.inputBodies
                             )
                             isSettingsPresented = false
                             playing = false
