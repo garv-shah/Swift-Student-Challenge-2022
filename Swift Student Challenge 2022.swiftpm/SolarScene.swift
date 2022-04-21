@@ -19,6 +19,8 @@ class SolarScene {
     var gameloop : Timer? = nil
     var counter: Double = 0
     var trails: Bool
+    var velocityArrows: Bool
+    var gravitationalConstant: CGFloat
     var inputBodies: [BodyDefiner]
     
     struct CelestialBody {
@@ -32,6 +34,8 @@ class SolarScene {
         var planetBody: SCNNode?
         var internalScene: SCNScene
         let gravitationalConstant: CGFloat
+        var velocityArrow: SCNNode? = nil
+        let velocityArrows: Bool
         
         
         mutating func initial() {
@@ -43,6 +47,11 @@ class SolarScene {
             body.name = "planet_" + internalName + "_" + "\(mass)"
             body.position = initialPosition
             planetBody = body
+            
+            if self.velocityArrows {
+                velocityArrow = lineBetweenNodes(positionA: returnPosition(timeStep: 1) + currentVelocity! * (radius * 4), positionB: returnPosition(timeStep: 1), inScene: internalScene, parentPosition: body.position)
+                body.addChildNode(velocityArrow!)
+            }
             internalScene.rootNode.addChildNode(body)
         }
         
@@ -69,10 +78,12 @@ class SolarScene {
         }
     }
     
-    init(focusOnBody: Bool, focusIndex: Int, trails: Bool, inputBodies: [BodyDefiner]) {
+    init(focusOnBody: Bool, focusIndex: Int, trails: Bool, velocityArrows: Bool, gravitationalConstant: CGFloat, inputBodies: [BodyDefiner]) {
         self.focusOnBody = focusOnBody
         self.focusIndex = focusIndex
         self.trails = trails
+        self.velocityArrows = velocityArrows
+        self.gravitationalConstant = gravitationalConstant
         self.inputBodies = inputBodies
         
         //create the stuff for SceneView
@@ -94,15 +105,17 @@ class SolarScene {
         
         for body in inputBodies {
             bodies.append(
-                CelestialBody(internalName: body.name, mass: body.mass, radius: body.mass, initialVelocity: body.velocity, initialPosition: body.position, color: body.color, internalScene: scene, gravitationalConstant: 1)
+                CelestialBody(internalName: body.name, mass: body.mass, radius: body.mass, initialVelocity: body.velocity, initialPosition: body.position, color: body.color, internalScene: scene, gravitationalConstant: gravitationalConstant, velocityArrows: velocityArrows)
             )
         }
         
-        for i in 0...bodies.count - 1 {
-            bodies[i].initial()
+        if bodies.count != 0 {
+            for i in 0...bodies.count - 1 {
+                bodies[i].initial()
+            }
+            
+            camera.look(at: bodies[focusIndex].planetBody!.position)
         }
-        
-        camera.look(at: bodies[focusIndex].planetBody!.position)
         
         if trails {
             showTrails()
@@ -134,7 +147,7 @@ class SolarScene {
     }
     
     func startLoop() {
-        gameloop = Timer.scheduledTimer(withTimeInterval: 0.015, repeats: true) { (_) in
+        gameloop = Timer.scheduledTimer(withTimeInterval: 0.015, repeats: true) { [self] (_) in
             for i in 0...self.bodies.count - 1 {
                 self.bodies[i].updateVelocity(timeStep: self.counter)
             }
@@ -144,6 +157,14 @@ class SolarScene {
                     self.bodies[i].updatePosition(timeStep: self.counter, focusBody: self.bodies[self.focusIndex])
                 } else {
                     self.bodies[i].updatePosition(timeStep: self.counter)
+                }
+                
+                let internalBody: CelestialBody = self.bodies[i]
+                
+                self.bodies[i].planetBody?.childNode(withName: "velocityArrow", recursively: true)?.removeFromParentNode()
+                
+                if velocityArrows {
+                    self.bodies[i].planetBody?.addChildNode(lineBetweenNodes(positionA: internalBody.planetBody?.position ?? SCNVector3(0, 0, 0), positionB: (internalBody.currentVelocity ?? SCNVector3(0, 0, 0)) * (internalBody.radius * 4) + (internalBody.planetBody?.position ?? SCNVector3(0, 0, 0)), inScene: self.scene, parentPosition: internalBody.planetBody?.position ?? SCNVector3(0, 0, 0)))
                 }
             }
             
@@ -182,6 +203,29 @@ class SolarScene {
             trail.particleColor = bodyStruct?.color.withAlphaComponent(0.1) ?? UIColor(.blue)
             trail.emitterShape = SCNSphere(radius: 1)
             body.addParticleSystem(trail)
+        }
+    }
+    
+    func loadNewBodies() {
+        let difference = inputBodies.count - bodies.count
+        let initialAmount = bodies.count
+        
+        for body in inputBodies {
+            bodies.append(
+                CelestialBody(internalName: body.name, mass: body.mass, radius: body.mass, initialVelocity: body.velocity, initialPosition: body.position, color: body.color, internalScene: scene, gravitationalConstant: gravitationalConstant, velocityArrows: velocityArrows)
+            )
+        }
+        
+        if bodies.count != 0 {
+            for i in initialAmount...difference - 1 {
+                bodies[i].initial()
+            }
+            
+            camera.look(at: bodies[focusIndex].planetBody!.position)
+        }
+        
+        if trails {
+            showTrails()
         }
     }
 }

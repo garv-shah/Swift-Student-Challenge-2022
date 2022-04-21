@@ -8,13 +8,13 @@ import PackageDescription
 import AppleProductTypes
 
 let package = Package(
-    name: "Swift Student Challenge 2022",
+    name: "Orbit",
     platforms: [
         .iOS("15.2")
     ],
     products: [
         .iOSApplication(
-            name: "Swift Student Challenge 2022",
+            name: "Orbit",
             targets: ["AppModule"],
             bundleIdentifier: "com.garv.Swift-Student-Challenge-2022",
             teamIdentifier: "J55VMN7UVW",

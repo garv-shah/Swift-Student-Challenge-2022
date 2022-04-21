@@ -24,6 +24,10 @@ func /(left: SCNVector3, right: Double) -> SCNVector3 {
     return SCNVector3(CGFloat(left.x) / CGFloat(right), CGFloat(left.y) / CGFloat(right), CGFloat(left.z) / CGFloat(right))
 }
 
+func +(left: SCNVector3, right: Double) -> SCNVector3 {
+    return SCNVector3(CGFloat(left.x) + CGFloat(right), CGFloat(left.y) + CGFloat(right), CGFloat(left.z) + CGFloat(right))
+}
+
 func +(left: SCNVector3, right: SCNVector3) -> SCNVector3 {
     return SCNVector3(x: left.x + right.x , y: left.y + right.y, z: left.z + right.z)
 }
@@ -46,3 +50,22 @@ extension SCNVector3 {
         return SCNVector3(CGFloat(self.x)/length, CGFloat(self.y)/length, CGFloat(self.z)/length)
     }
 }
+
+func lineBetweenNodes(positionA: SCNVector3, positionB: SCNVector3, inScene: SCNScene, parentPosition: SCNVector3) -> SCNNode {
+        let vector = SCNVector3(positionA.x - positionB.x, positionA.y - positionB.y, positionA.z - positionB.z)
+        let distance = sqrt(vector.x * vector.x + vector.y * vector.y + vector.z * vector.z)
+        let midPosition = SCNVector3 (x:(positionA.x + positionB.x) / 2, y:(positionA.y + positionB.y) / 2, z:(positionA.z + positionB.z) / 2)
+
+        let lineGeometry = SCNCylinder()
+    lineGeometry.radius = 0.75
+        lineGeometry.height = CGFloat(distance)
+        lineGeometry.radialSegmentCount = 5
+        lineGeometry.firstMaterial!.diffuse.contents = UIColor.systemRed
+
+        let lineNode = SCNNode(geometry: lineGeometry)
+        lineNode.name = "velocityArrow"
+        lineNode.position = midPosition
+        lineNode.look (at: positionB, up: inScene.rootNode.worldUp, localFront: lineNode.worldUp)
+        lineNode.position = lineNode.position - parentPosition
+        return lineNode
+    }
