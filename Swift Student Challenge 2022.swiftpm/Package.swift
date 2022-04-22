@@ -18,7 +18,7 @@ let package = Package(
             targets: ["AppModule"],
             bundleIdentifier: "com.garv.Swift-Student-Challenge-2022",
             teamIdentifier: "J55VMN7UVW",
-            displayVersion: "1.0",
+            displayVersion: "1.1",
             bundleVersion: "1",
             iconAssetName: "AppIcon",
             accentColorAssetName: "AccentColor",
@@ -31,6 +31,9 @@ let package = Package(
                 .landscapeRight,
                 .landscapeLeft,
                 .portraitUpsideDown(.when(deviceFamilies: [.pad]))
+            ],
+            capabilities: [
+                .camera(purposeString: "To allow Orbit to use ARKit and create an AR scene")
             ]
         )
     ],

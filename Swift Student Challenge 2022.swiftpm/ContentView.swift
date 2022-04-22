@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 import SceneKit
+import ARKit
 
 struct ContentView: View {
     @State var scale: CGFloat = 0.5
@@ -258,7 +259,7 @@ struct InfoView: View {
                     .colorInvert()
                     .padding(30)
                 
-                Text("Newton's Universal Law of Gravition is a rule that predicts the movement of bodies by stating that every object in the universe excerts some gravitational force on every other object nearby it. This is predicted by the rule above.")
+                Text("Newton's Universal Law of Gravition is a rule that predicts the movement of bodies by stating that every object in the universe excerts some gravitational force on every other object nearby it. This is predicted by the equation above.")
                     .multilineTextAlignment(.center)
                     .padding(15)
                 

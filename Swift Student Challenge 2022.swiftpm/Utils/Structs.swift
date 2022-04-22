@@ -8,6 +8,7 @@
 import Foundation
 import SceneKit
 import SwiftUI
+import ARKit
 
 struct BodyDefiner {
     var name: String
@@ -99,5 +100,20 @@ extension String {
         let fontAttributes = [NSAttributedString.Key.font: font]
         let size = self.size(withAttributes: fontAttributes)
         return size.width
+    }
+}
+
+struct ARViewRepresentable: UIViewRepresentable {
+    let arDelegate:ARDelegate
+    let solar: SolarScene
+    
+    func makeUIView(context: Context) -> some UIView {
+        let arView = ARSCNView(frame: .zero)
+        arDelegate.setARView(arView, solar: solar)
+        return arView
+    }
+    
+    func updateUIView(_ uiView: UIViewType, context: Context) {
+        
     }
 }

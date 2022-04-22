@@ -96,7 +96,7 @@ class SolarScene {
         
         camera = SCNNode()
         camera.camera = SCNCamera()
-        camera.camera?.zFar = 800
+        camera.camera?.zFar = 1500
         camera.position = SCNVector3(x: 0, y: 0, z: 400)
         
         if allowCameraControl {
