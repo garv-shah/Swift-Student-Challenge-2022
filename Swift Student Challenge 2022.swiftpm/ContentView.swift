@@ -104,7 +104,7 @@ struct ContentView: View {
                         ],
                         showUI: false,
                         allowCameraControl: false,
-                        cameraTransform: SCNVector3(-(UIScreen.main.bounds.size.width/2 - 120), UIScreen.main.bounds.size.height/2 - 120, 0)
+                        cameraTransform: SCNVector3(-120, 120, 0)
                     )
 
                     Text("🤖")
