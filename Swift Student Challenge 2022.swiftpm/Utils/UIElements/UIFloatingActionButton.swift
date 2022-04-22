@@ -76,21 +76,3 @@ extension View {
                                                align: align))
         }
 }
-
-extension Array {
-    subscript( circular index: Int ) -> Element? {
-        guard !isEmpty else { return nil }
-        let modIndex = index % count
-        return self[ modIndex < 0 ? modIndex + count : modIndex ]
-    }
-}
-
-extension Color {
-    static var random: Color {
-        return Color(
-            red: .random(in: 0...1),
-            green: .random(in: 0...1),
-            blue: .random(in: 0...1)
-        )
-    }
-}

@@ -22,6 +22,8 @@ class SolarScene {
     var velocityArrows: Bool
     var gravitationalConstant: CGFloat
     var inputBodies: [BodyDefiner]
+    var allowCameraControl: Bool
+    var cameraTransform: SCNVector3 = SCNVector3(0, 0, 0)
     
     struct CelestialBody {
         var internalName: String
@@ -49,7 +51,8 @@ class SolarScene {
             planetBody = body
             
             if self.velocityArrows {
-                velocityArrow = lineBetweenNodes(positionA: returnPosition(timeStep: 1) + currentVelocity! * (radius * 4), positionB: returnPosition(timeStep: 1), inScene: internalScene, parentPosition: body.position)
+                let normalised = currentVelocity?.normalized ?? SCNVector3(0, 0, 0)
+                velocityArrow = lineBetweenNodes(positionA: (returnPosition(timeStep: 1) + currentVelocity! * 6) + (normalised * radius), positionB: returnPosition(timeStep: 1), inScene: internalScene, parentPosition: body.position)
                 body.addChildNode(velocityArrow!)
             }
             internalScene.rootNode.addChildNode(body)
@@ -78,27 +81,36 @@ class SolarScene {
         }
     }
     
-    init(focusOnBody: Bool, focusIndex: Int, trails: Bool, velocityArrows: Bool, gravitationalConstant: CGFloat, inputBodies: [BodyDefiner]) {
+    init(focusOnBody: Bool, focusIndex: Int, trails: Bool, velocityArrows: Bool, gravitationalConstant: CGFloat, inputBodies: [BodyDefiner], allowCameraControl: Bool, cameraTransform: SCNVector3 = SCNVector3(0, 0, 0)) {
         self.focusOnBody = focusOnBody
         self.focusIndex = focusIndex
         self.trails = trails
         self.velocityArrows = velocityArrows
         self.gravitationalConstant = gravitationalConstant
         self.inputBodies = inputBodies
+        self.allowCameraControl = allowCameraControl
+        self.cameraTransform = cameraTransform
         
         //create the stuff for SceneView
         scene = SCNScene()
         
         camera = SCNNode()
         camera.camera = SCNCamera()
-        camera.camera?.zFar = 500
-        camera.position = SCNVector3(x: 0, y: 150, z: 0)
+        camera.camera?.zFar = 800
+        camera.position = SCNVector3(x: 0, y: 0, z: 400)
         
-        viewOptions = [
-            .allowsCameraControl,
-            .autoenablesDefaultLighting,
-            .temporalAntialiasingEnabled
-        ]
+        if allowCameraControl {
+            viewOptions = [
+                .allowsCameraControl,
+                .autoenablesDefaultLighting,
+                .temporalAntialiasingEnabled
+            ]
+        } else {
+            viewOptions = [
+                .autoenablesDefaultLighting,
+                .temporalAntialiasingEnabled
+            ]
+        }
         
         //set up the scene object
         scene.background.contents = UIColor.black
@@ -120,6 +132,8 @@ class SolarScene {
         if trails {
             showTrails()
         }
+        
+        camera.position = camera.position + cameraTransform
     }
     
 //    func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
@@ -164,7 +178,17 @@ class SolarScene {
                 self.bodies[i].planetBody?.childNode(withName: "velocityArrow", recursively: true)?.removeFromParentNode()
                 
                 if velocityArrows {
-                    self.bodies[i].planetBody?.addChildNode(lineBetweenNodes(positionA: internalBody.planetBody?.position ?? SCNVector3(0, 0, 0), positionB: (internalBody.currentVelocity ?? SCNVector3(0, 0, 0)) * (internalBody.radius * 4) + (internalBody.planetBody?.position ?? SCNVector3(0, 0, 0)), inScene: self.scene, parentPosition: internalBody.planetBody?.position ?? SCNVector3(0, 0, 0)))
+                    let internalBodyPosition = internalBody.planetBody?.position ?? SCNVector3(0, 0, 0)
+                    let internalBodyCurrentVelocity = internalBody.currentVelocity ?? SCNVector3(0, 0, 0)
+                    
+                    self.bodies[i].planetBody?.addChildNode(
+                        lineBetweenNodes(
+                            positionA: internalBodyPosition,
+                            positionB: (internalBodyPosition + internalBodyCurrentVelocity * 6) + (internalBodyCurrentVelocity.normalized * internalBody.radius),
+                            inScene: self.scene,
+                            parentPosition: internalBodyPosition
+                        )
+                    )
                 }
             }
             
