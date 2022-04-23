@@ -5,6 +5,12 @@
 //  Created by Garv Shah on 18/4/2022.
 //
 
+// space textures from :
+// https://www.solarsystemscope.com/textures/
+// http://wwwtyro.github.io/space-3d
+// https://planet-texture-maps.fandom.com/wiki/Sun
+// All licenses have been respected and allow commercial use
+
 import SwiftUI
 import SceneKit
 import Foundation
@@ -45,10 +51,21 @@ class SolarScene {
             currentVelocity = initialVelocity
             let object = SCNSphere(radius: radius)
             let material = object.firstMaterial!
-            material.diffuse.contents = color
+            
+            if ["Earth", "Sun", "Moon", "Mars", "Mercury", "Venus", "Jupiter", "Saturn", "Uranus"].contains(internalName) {
+                material.diffuse.contents = UIImage(named: internalName)
+            } else {
+                material.diffuse.contents = color
+            }
+            
             let body = SCNNode(geometry: object)
             body.name = "planet_" + internalName + "_" + "\(mass)"
             body.position = initialPosition
+            
+            if internalName == "Sun" {
+                body.filters = addBloom()
+            }
+            
             planetBody = body
             
             if self.velocityArrows {
@@ -147,30 +164,6 @@ class SolarScene {
         camera.position = camera.position + cameraTransform
     }
     
-//    func renderer(_ renderer: SCNSceneRenderer, updateAtTime time: TimeInterval) {
-//        print("test")
-//    }
-    
-    func createBody() {
-        
-        //create box geometry
-        let box = SCNBox(width: 20, height: 29, length: 10, chamferRadius: 0.2)
-        
-        //create material for box geometry
-        let material = SCNMaterial()
-        material.diffuse.contents = UIColor.yellow
-        material.lightingModel = .blinn
-        
-        //set the material on the box (array because several materials can be applied)
-        box.materials = [material]
-        let boxNode = SCNNode(geometry: box)
-        boxNode.name = "box"
-        
-        //set the box as the geometry of the scenes root node (the only SCNNode in this scene)
-        scene.rootNode.addChildNode(boxNode)
-        
-    }
-    
     func startLoop() {
         gameloop = Timer.scheduledTimer(withTimeInterval: 0.015, repeats: true) { [self] (_) in
             for i in 0...self.bodies.count - 1 {
@@ -236,7 +229,7 @@ class SolarScene {
             trail.birthRate = 10000
             trail.particleSize = 0.1
             trail.particleColor = bodyStruct?.color.withAlphaComponent(0.1) ?? UIColor(.blue)
-            trail.emitterShape = SCNSphere(radius: 1)
+            trail.emitterShape = SCNSphere(radius: 0.8)
             body.addParticleSystem(trail)
         }
     }

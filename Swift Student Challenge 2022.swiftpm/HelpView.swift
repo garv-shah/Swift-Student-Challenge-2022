@@ -57,10 +57,10 @@ struct HelpView: View {
                     Text("Restarting the scene to its initial state")
                 }
                 .frame(minHeight: 750)
+                .hasScrollEnabled(false)
                 
             }
             .padding(20)
-            .hasScrollEnabled(false)
             
             HStack {
                 Image(systemName: "plus").foregroundColor(.white)

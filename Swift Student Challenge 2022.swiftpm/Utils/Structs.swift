@@ -149,3 +149,14 @@ extension View {
         }
     }
 }
+
+func addBloom() -> [CIFilter]? {
+    let bloomFilter = CIFilter(name:"CIBloom")!
+    bloomFilter.setValue(8.0, forKey: "inputIntensity")
+    bloomFilter.setValue(18.0, forKey: "inputRadius")
+    
+    let blurFilter = CIFilter(name: "CIGaussianBlur")!
+    blurFilter.setValue(0.6, forKey: kCIInputRadiusKey)
+
+    return [bloomFilter, blurFilter]
+}
