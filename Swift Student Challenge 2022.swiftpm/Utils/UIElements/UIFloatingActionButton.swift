@@ -20,6 +20,7 @@ struct FloatingActionButton<ImageView: View>: ViewModifier {
     let customX: CGFloat?
     let opacity: CGFloat?
     let align: ButtonAlign
+    let top: Bool
     
     private let size: CGFloat = 60
     private let margin: CGFloat = 15
@@ -45,15 +46,24 @@ struct FloatingActionButton<ImageView: View>: ViewModifier {
         }
     }
     
+    func getTop() -> CGFloat {
+        if top {
+            return -1
+        } else {
+            return 1
+        }
+    }
+    
     @ViewBuilder private func button(_ geo: GeometryProxy) -> some View {
         image
             .imageScale(.large)
             .frame(width: size, height: size)
+            .contentShape(Rectangle())
             .background(Circle().fill(color))
             .onTapGesture(perform: action)
             .opacity(opacity ?? 1)
             .offset(x: getAlign() * ((geo.size.width - size) / 2 - margin*2) + (customX ?? 0),
-                    y: ((geo.size.height - size) / 2 - margin) - (customY ?? 0)
+                    y: (getTop() * (geo.size.height - size) / 2 - margin) - (customY ?? 0)
             )
     }
 }
@@ -66,6 +76,7 @@ extension View {
         customY: CGFloat? = nil,
         customX: CGFloat? = nil,
         opacity: CGFloat? = nil,
+        top: Bool = false,
         action: @escaping () -> Void) -> some View {
             self.modifier(FloatingActionButton(color: color,
                                                image: image,
@@ -73,6 +84,7 @@ extension View {
                                                customY: customY,
                                                customX: customX,
                                                opacity: opacity,
-                                               align: align))
+                                               align: align,
+                                               top: top))
         }
 }

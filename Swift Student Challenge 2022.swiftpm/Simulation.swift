@@ -14,7 +14,8 @@ struct Simulation: View {
         velocityArrows: false,
         gravitationalConstant: 1,
         inputBodies: [],
-        allowCameraControl: true
+        allowCameraControl: true,
+        showTexture: true
     )
     
     @State private var sideButtonsX: CGFloat = 100
@@ -56,6 +57,8 @@ struct Simulation: View {
     @State private var gravitationalConstant: CGFloat = 1
     @State private var playing: Bool = false
     
+    @State private var isHelpActive: Bool = false
+    
     var startingFocusOnBody: Bool
     var startingShowTrails: Bool
     var startingShowVelocityArrows: Bool
@@ -64,11 +67,12 @@ struct Simulation: View {
     var startingBodies: [BodyDefiner]
     var showUI: Bool
     var allowCameraControl: Bool
+    var showTexture: Bool = true
     var cameraTransform: SCNVector3 = SCNVector3(0, 0, 0)
     
     @ObservedObject var arDelegate = ARDelegate()
     
-    init(startingFocusOnBody: Bool, startingShowTrails: Bool, startingShowVelocityArrows: Bool, startingGravitationalConstant: CGFloat, startingFocusIndex: Int, startingBodies: [BodyDefiner], showUI: Bool, allowCameraControl: Bool, cameraTransform: SCNVector3 = SCNVector3(0, 0, 0)) {
+    init(startingFocusOnBody: Bool, startingShowTrails: Bool, startingShowVelocityArrows: Bool, startingGravitationalConstant: CGFloat, startingFocusIndex: Int, startingBodies: [BodyDefiner], showUI: Bool, allowCameraControl: Bool, cameraTransform: SCNVector3 = SCNVector3(0, 0, 0), showTexture: Bool = true) {
         self.startingFocusOnBody = startingFocusOnBody
         self.startingShowTrails = startingShowTrails
         self.startingShowVelocityArrows = startingShowVelocityArrows
@@ -78,6 +82,7 @@ struct Simulation: View {
         self.showUI = showUI
         self.allowCameraControl = allowCameraControl
         self.cameraTransform = cameraTransform
+        self.showTexture = showTexture
         
         solarscene.focusOnBody = startingFocusOnBody
         solarscene.focusIndex = startingFocusIndex
@@ -94,6 +99,11 @@ struct Simulation: View {
 
                 ARViewRepresentable(arDelegate: arDelegate, solar: solarscene)
 
+                        // help button
+                        .floatingActionButton(color: .clear, image: Image(systemName: "questionmark.circle").foregroundColor(.white), align: ButtonAlign.right, customY: -20, customX: 15, top: true) {
+                            isHelpActive.toggle()
+                        }
+                
                         // show side menu button
                         .floatingActionButton(color: .accentColor, image: Image(systemName: "plus").foregroundColor(.white), align: ButtonAlign.right) {
                             withAnimation(.easeInOut(duration: 0.3)) {
@@ -610,6 +620,7 @@ struct Simulation: View {
                                     .frame(maxWidth: .infinity, alignment: .center)
                         }
             }
+                    .navigate(to: HelpView(), when: $isHelpActive)
         } else if showUI {
             VStack {
 
@@ -618,6 +629,11 @@ struct Simulation: View {
                         pointOfView: solarscene.camera,
                         options: solarscene.viewOptions
                 )
+                        
+                        // help button
+                        .floatingActionButton(color: .clear, image: Image(systemName: "questionmark.circle").foregroundColor(.white), align: ButtonAlign.right, customY: -20, customX: 15, top: true) {
+                            isHelpActive.toggle()
+                        }
 
                         // show side menu button
                         .floatingActionButton(color: .accentColor, image: Image(systemName: "plus").foregroundColor(.white), align: ButtonAlign.right) {
@@ -1128,6 +1144,7 @@ struct Simulation: View {
                                     .frame(maxWidth: .infinity, alignment: .center)
                         }
             }
+                    .navigate(to: HelpView(), when: $isHelpActive)
         } else {
             VStack {
                 SceneView(
@@ -1138,7 +1155,7 @@ struct Simulation: View {
             }
             .onAppear() {
                 if !allowCameraControl {
-                    solarscene = SolarScene(focusOnBody: solarscene.focusOnBody, focusIndex: solarscene.focusIndex, trails: solarscene.trails, velocityArrows: solarscene.velocityArrows, gravitationalConstant: solarscene.gravitationalConstant, inputBodies: solarscene.inputBodies, allowCameraControl: false, cameraTransform: cameraTransform)
+                    solarscene = SolarScene(focusOnBody: solarscene.focusOnBody, focusIndex: solarscene.focusIndex, trails: solarscene.trails, velocityArrows: solarscene.velocityArrows, gravitationalConstant: solarscene.gravitationalConstant, inputBodies: solarscene.inputBodies, allowCameraControl: false, cameraTransform: cameraTransform, showTexture: false)
                 }
                 solarscene.startLoop()
                 playing = true

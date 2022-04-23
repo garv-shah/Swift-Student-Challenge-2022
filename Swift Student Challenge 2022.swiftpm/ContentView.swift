@@ -26,6 +26,7 @@ struct ContentView: View {
     @State private var movingCursor: Bool = false
     @State private var blinkingCursor: Bool = false
     @State private var displayText: String = ""
+    @State private var hintTextOpacity: CGFloat = 0
     
     @State private var moveOnY: Bool = true
         
@@ -76,6 +77,14 @@ struct ContentView: View {
                             withAnimation() {
                                 displayText = "Woahh, what are those?!"
                                 showTalking = true
+                                
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 5.5) {
+                                    if displayText == "Woahh, what are those?!" {
+                                        withAnimation(.easeOut(duration: 4).delay(0.5)) {
+                                            hintTextOpacity = 1
+                                        }
+                                    }
+                                }
                             }
                         }
                         .opacity(continueOpacity)
@@ -104,7 +113,8 @@ struct ContentView: View {
                         ],
                         showUI: false,
                         allowCameraControl: false,
-                        cameraTransform: SCNVector3(-120, 120, 0)
+                        cameraTransform: SCNVector3(-120, 120, 0),
+                        showTexture: false
                     )
 
                     Text("🤖")
@@ -124,36 +134,50 @@ struct ContentView: View {
                             .opacity(0)
 
                         let textWidth = displayText.widthOfString(usingFont: UIFont.preferredFont(forTextStyle: .body))
+                        
+                        VStack {
+                            
+                            HStack {
+                                Text(displayText)
+                                    .font(.body)
+                                    .mask(Rectangle().offset(x: writing ? 0 : -textWidth))
+                                    .multilineTextAlignment(.center)
+                                Rectangle()
+                                    .fill(cursorColor)
+                                    .opacity(blinkingCursor ? 1 : 0)
+                                    .frame(width: 2, height: 24)
+                                    .offset(x: movingCursor ? 0 : -(textWidth + 15))
+                                    .onAppear() {
+                                        withAnimation(.easeOut(duration: 2).delay(3)) {
+                                            writing.toggle()
+                                            movingCursor.toggle()
+                                        }
 
-                        Text(displayText)
-                            .font(.body)
-                            .mask(Rectangle().offset(x: writing ? 0 : -textWidth))
-                            .multilineTextAlignment(.center)
-                        Rectangle()
-                            .fill(cursorColor)
-                            .opacity(blinkingCursor ? 1 : 0)
-                            .frame(width: 2, height: 24)
-                            .offset(x: movingCursor ? 0 : -(textWidth + 15))
-                            .onAppear() {
-                                withAnimation(.easeOut(duration: 2).delay(3)) {
-                                    writing.toggle()
-                                    movingCursor.toggle()
-                                }
-
-                                withAnimation(.easeInOut(duration: 0.6).repeatForever(autoreverses: true).delay(2)) {
-                                    blinkingCursor.toggle()
-                                }
+                                        withAnimation(.easeInOut(duration: 0.6).repeatForever(autoreverses: true).delay(2)) {
+                                            blinkingCursor.toggle()
+                                        }
+                                    }
                             }
+                            
+                            Text("tap text above to continue")
+                                .font(.system(size: 12))
+                                .foregroundColor(.gray)
+                                .opacity(hintTextOpacity)
+                        }
 
                     }
                     .offset(
-                        y: moveOnY ? (UIScreen.main.bounds.size.height/2 - 95) : 0
+                        y: moveOnY ? (UIScreen.main.bounds.size.height/2 - 80) : 0
                     )
                     .onTapGesture {
                         if displayText == "Woahh, what are those?!" {
                             withAnimation(.easeOut(duration: 0.5)) {
                                 writing.toggle()
                                 movingCursor.toggle()
+                            }
+                            
+                            withAnimation(.easeOut(duration: 1.5).delay(0.5)) {
+                                hintTextOpacity = 0
                             }
 
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
@@ -232,7 +256,8 @@ struct SimulationView: View {
                 BodyDefiner(name: "Mars", mass: 5.0, velocity: SCNVector3(0.4, 0, 0), position: SCNVector3(0, -150, 0), color: UIColor.systemRed),
             ],
             showUI: true,
-            allowCameraControl: true
+            allowCameraControl: true,
+            showTexture: true
         )
     }
 }

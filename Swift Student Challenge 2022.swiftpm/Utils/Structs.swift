@@ -117,3 +117,35 @@ struct ARViewRepresentable: UIViewRepresentable {
         
     }
 }
+
+extension View {
+    func navigate<NewView: View>(to view: NewView, when binding: Binding<Bool>) -> some View {
+        NavigationView {
+            ZStack {
+                self
+                    .navigationBarTitle("")
+                    .navigationBarHidden(true)
+
+                NavigationLink(
+                    destination: view
+                        .navigationBarTitle("")
+                        .navigationBarTitleDisplayMode(.inline)
+                        .navigationBarHidden(false),
+                    isActive: binding
+                ) {
+                    EmptyView()
+                }
+            }
+        }
+        .navigationViewStyle(.stack)
+    }
+}
+
+extension View {
+    
+    func hasScrollEnabled(_ value: Bool) -> some View {
+        self.onAppear {
+            UITableView.appearance().isScrollEnabled = value
+        }
+    }
+}

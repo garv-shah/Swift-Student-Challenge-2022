@@ -24,6 +24,7 @@ class SolarScene {
     var inputBodies: [BodyDefiner]
     var allowCameraControl: Bool
     var cameraTransform: SCNVector3 = SCNVector3(0, 0, 0)
+    var showTexture: Bool = true
     
     struct CelestialBody {
         var internalName: String
@@ -81,7 +82,7 @@ class SolarScene {
         }
     }
     
-    init(focusOnBody: Bool, focusIndex: Int, trails: Bool, velocityArrows: Bool, gravitationalConstant: CGFloat, inputBodies: [BodyDefiner], allowCameraControl: Bool, cameraTransform: SCNVector3 = SCNVector3(0, 0, 0)) {
+    init(focusOnBody: Bool, focusIndex: Int, trails: Bool, velocityArrows: Bool, gravitationalConstant: CGFloat, inputBodies: [BodyDefiner], allowCameraControl: Bool, cameraTransform: SCNVector3 = SCNVector3(0, 0, 0), showTexture: Bool = true) {
         self.focusOnBody = focusOnBody
         self.focusIndex = focusIndex
         self.trails = trails
@@ -90,6 +91,7 @@ class SolarScene {
         self.inputBodies = inputBodies
         self.allowCameraControl = allowCameraControl
         self.cameraTransform = cameraTransform
+        self.showTexture = showTexture
         
         //create the stuff for SceneView
         scene = SCNScene()
@@ -113,7 +115,16 @@ class SolarScene {
         }
         
         //set up the scene object
-        scene.background.contents = UIColor.black
+        if showTexture {
+            scene.background.contents = [UIImage(named: "right"),
+                                         UIImage(named: "left"),
+                                         UIImage(named: "top"),
+                                         UIImage(named: "bottom"),
+                                         UIImage(named: "front"),
+                                         UIImage(named: "back")]
+        } else {
+            scene.background.contents = UIColor.black
+        }
         
         for body in inputBodies {
             bodies.append(
