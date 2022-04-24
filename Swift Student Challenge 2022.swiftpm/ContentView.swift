@@ -182,12 +182,12 @@ struct ContentView: View {
 
                             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                                 withAnimation(.easeOut(duration: 2).delay(0.5)) {
-                                    displayText = "Let me Google it really quickly"
+                                    displayText = "Let me ask Siri really quickly"
                                     writing.toggle()
                                     movingCursor.toggle()
                                 }
                             }
-                        } else if displayText == "Let me Google it really quickly" {
+                        } else if displayText == "Let me ask Siri really quickly" {
                             withAnimation(.easeOut(duration: 0.5)) {
                                 writing.toggle()
                                 movingCursor.toggle()
