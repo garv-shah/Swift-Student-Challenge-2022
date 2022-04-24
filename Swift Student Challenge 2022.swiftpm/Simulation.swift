@@ -1,7 +1,6 @@
 import SwiftUI
 import SceneKit
 import Foundation
-import SlideOverCard
 import Combine
 
 
