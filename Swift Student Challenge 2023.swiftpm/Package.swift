@@ -16,10 +16,10 @@ let package = Package(
         .iOSApplication(
             name: "Orbit",
             targets: ["AppModule"],
-            bundleIdentifier: "com.garv.Swift-Student-Challenge-2022",
+            bundleIdentifier: "com.garv.orbit",
             teamIdentifier: "J55VMN7UVW",
             displayVersion: "1.1",
-            bundleVersion: "1",
+            bundleVersion: "5",
             iconAssetName: "AppIcon",
             accentColorAssetName: "AccentColor",
             supportedDeviceFamilies: [
