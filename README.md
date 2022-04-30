@@ -13,12 +13,7 @@ Orbit is a fun sandbox to explore the effects of Newtonian Gravity and learn a b
 `SwiftUI`, `SceneKit`, `ARKit`, `Combine`
 
 ## Installation
-### App Store
-Download the app from the link above!
-### MacOS
-Clone or download the project and then right click the .swiftpm file and click "Open in Xcode". If you don't have Xcode installed, download it from [here](https://apps.apple.com/au/app/xcode/id497799835?mt=12)
-### iPadOS
-Clone or download the project, and then click the .swiftpm file in Files. This should open up the file in Swift Playgrounds if you have it installed, if not you can get it from [here](https://apps.apple.com/au/app/swift-playgrounds/id1496833156?mt=12)
+If you'd just like to run the app, I'd recommend downloading from the app store link above. If not, you can open up `Swift Student Challenge 2022.swiftpm` in either Xcode (MacOS) or Swift Playgrounds (iPadOS) to edit the contents and fiddle with the code. Have fun!
 
 ## Screenshots
 ![Screenshot 1](Swift%20Student%20Challenge%202022.swiftpm/assets/App%20Store/iPad%20Pro/Frame%20802.png)
